@@ -6,10 +6,28 @@
  *   2. Add an expedited-shipping surcharge if flagged.
  *   3. Apply a promo-code discount if the code is one of the known codes.
  *   4. Apply a loyalty-tier discount based on customer.loyaltyYears.
- *   5. Add regional tax.
+ *   5. Add regional tax
  *
  */
 public class PriceEngine {
+
+    private static Money applyLoyaltyDiscount(Money running, Money subtotal, Customer customer) {
+        int years = customer.loyaltyYears();
+        double loyaltyRate;
+        if (years >= 5) {
+            loyaltyRate = 0.10;
+        } else if (years >= 3) {
+            loyaltyRate = 0.05;
+        } else if (years >= 1) {
+            loyaltyRate = 0.02;
+        } else {
+            loyaltyRate = 0.0;
+        }
+        if (loyaltyRate > 0.0) {
+            running = running.subtract(subtotal.times(loyaltyRate));
+        }
+        return running;
+    }
 
     public static Money quote(Order order, Customer customer) {
         if (order == null || order.lines() == null || order.lines().isEmpty()) {
@@ -49,23 +67,7 @@ public class PriceEngine {
         }
 
         // 4. Loyalty-tier discount
-        //    tier 1 (1-2 years):  2% off
-        //    tier 2 (3-4 years):  5% off
-        //    tier 3 (5+ years):  10% off
-        int years = customer.loyaltyYears();
-        double loyaltyRate;
-        if (years >= 5) {
-            loyaltyRate = 0.10;
-        } else if (years >= 3) {
-            loyaltyRate = 0.05;
-        } else if (years >= 1) {
-            loyaltyRate = 0.02;
-        } else {
-            loyaltyRate = 0.0;
-        }
-        if (loyaltyRate > 0.0) {
-            running = running.subtract(subtotal.times(loyaltyRate));
-        }
+        running = applyLoyaltyDiscount(running, subtotal, customer);
 
         // 5. Regional tax
         double taxRate;
