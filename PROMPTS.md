@@ -158,3 +158,8 @@ All tests still pass
 
 - pmd says the complexity is 19 now yes it decreased from its original 23.
 
+## D
+
+- Cylomatic Complexity dropped by 4.
+- AI suggested to flatten all the clauses but I rejected it doesn't have the a good value for its cleanup with respect to the refactor for quote. Adding it will just add noise and will not chase program's behaviour and not even reduce the risks of bugs.
+
